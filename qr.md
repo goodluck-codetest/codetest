@@ -1,4 +1,4 @@
-Use yahoo finance api (or yfinance https://pypi.org/project/yfinance/ ) to download the past 3 years’ SPX 500 stock daily price. Please use your most familiar programming language (python preferred) to implement - 
+Use yahoo finance api (or yfinance https://pypi.org/project/yfinance/ ) to download the past 5 years’ SPX 500 stock daily price. Please use your most familiar programming language (python preferred) to implement - 
 1. PCA risk modeling
   - apply 5 factors PCA risk model on given time series
   - 90 days rolling windows 
