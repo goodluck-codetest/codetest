@@ -12,3 +12,4 @@ Please build and backtest a market-neutral trading strategy / time-varying portf
 - Class of signals – you are not required to use all the data variables provided. You can focus on a subset if you prefer but please limit yourself to the data provided.
 
 You are being tested on your ability to perform good quantitative research – please organize your code in a logical manner and document your code in-line to explain your research process.
+Please provide the result visualization via Jupyter/HTML/PDF
