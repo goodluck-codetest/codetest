@@ -4,14 +4,14 @@ Choose your familiar language to implement an algorithm execution engine.
   - order management component (OMS)
   - strategy interfaces, e.g. OnTick, OnOrderResponse etc
 2. Strategy implemention
-  - algos engine:
+  - algos engine
     - implement TWAP and pair-trading algos
     - target completion with certain limits, e.g. end-time, max participation
     - risk management, e.g, imbalance fills, market volatile moves
     - execution optimization, e.g, order slicing
   - beta hedger
     - each stock has its own beta to indice benchmark, beta exposure = beta * position. total beta expo = sum of all stocks
-    - place future orders to hedge net beta exposure under certain risk
-    - please include open orders into consideration, which can be stock order or hedging order itself
+    - place index future orders to hedge net beta exposure under given risk
+    - include open orders into consideration, which can be stock order or hedging order itself
 3. Design document
-  - including but not limited to architecture overview, modularization, persistence, user interface etc.
+  - include but not limited to architecture overview, modularization, persistence, user interface etc.
