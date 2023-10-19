@@ -3,10 +3,15 @@ Choose your familiar language to implement an algorithm execution engine.
   - core data structures, class definition of market data, order etc
   - order management component (OMS)
   - strategy interfaces, e.g. OnTick, OnOrderResponse etc
-2. Trading algo implemention
-  - 2 execution algos: TWAP and Pair-trading 
-  - target completion with certain limits, e.g. end-time, max participation
-  - risk management, e.g, imbalance fills, market volatile moves
-  - execution optimization, e.g, order slicing
+2. Strategy implemention
+  - algos engine:
+    - implement TWAP and pair-trading algos
+    - target completion with certain limits, e.g. end-time, max participation
+    - risk management, e.g, imbalance fills, market volatile moves
+    - execution optimization, e.g, order slicing
+  - beta hedger
+    - each stock has its own beta to indice benchmark, beta exposure = beta * position. total beta expo = sum of all stocks
+    - place future orders to hedge net beta exposure under certain risk
+    - please include open orders into consideration, which can be stock order or hedging order itself
 3. Design document
   - including but not limited to architecture overview, modularization, persistence, user interface etc.
