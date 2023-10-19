@@ -1,4 +1,4 @@
-Choose your familiar language to implement an algorithm execution engine. 
+Choose your familiar language to implement automatic trading stragies and its platform. 
 1. Framework design
   - core data structures, class definition of market data, order etc
   - order management component (OMS)
