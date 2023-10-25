@@ -6,7 +6,7 @@ And design the schema and implement a point in time database to save all data th
 - Implement the scraper and perform data check.
 - Design job scheduler to run scraper in daily basis.
 - Databases can be in any format you are familiar with, preferably in kdb or just a binary file that can be loaded in python. 
-- For the schema design, please be specific regarding the key/index to be applied. Submit final schema or sample data in tablular formats
+- For the schema design, please be specific regarding the key/index to be applied. Submit final schema or sample data in csv formats.
 - Please note that the events might be cancelled or auction date/cusip could be up to changes. That information should be captured by the job.
 
 2. Future Series Construction
