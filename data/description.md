@@ -1,4 +1,4 @@
-1. ETL/DB design for US Treasury
+# 1. ETL/DB design for US Treasury
 
 US Treasury department publish announcement of their upcoming bond issuances, the objective is to build a pipeline for this dataset. Please implement a scraper to scrape the website:
 https://treasurydirect.gov/auctions/upcoming/
@@ -9,7 +9,7 @@ And design the schema and implement a point in time database to save all data th
 - For the schema design, please be specific regarding the key/index to be applied.
 - Please note that the events might be cancelled or auction date/cusip could be up to changes. That information should be captured by the job.
 
-2. Future roll and continonous price adjustment
+# 2. Future roll and continonous price adjustment
 
 Futures contracts have a limited lifespan that will influence the outcome of your trades and exit strategy. The two most important expiration terms are expiration and rollover. Please construct a continous future series according to below defintion, refer to:
 https://www.cmegroup.com/education/courses/introduction-to-futures/understanding-futures-expiration-contract-roll.html
