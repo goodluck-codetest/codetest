@@ -3,10 +3,10 @@
 US Treasury department publish announcement of their upcoming bond issuances, the objective is to build a pipeline for this dataset. Please implement a scraper to scrape the website:
 https://treasurydirect.gov/auctions/upcoming/
 And design the schema and implement a point in time database to save all data that could possibly be of interest so it can be retrieved in the future for backtest purposes. Below are some specific requirements:
-- Please implement the scraper and perform data check.
-- The scraper is supposed to run daily.
+- Implement the scraper and perform data check.
+- Design job scheduler to run scraper in daily basis.
 - Databases can be in any format you are familiar with, preferably in kdb or just a binary file that can be loaded in python. 
-- For the schema design, please be specific regarding the key/index to be applied.
+- For the schema design, please be specific regarding the key/index to be applied. Submit final schema or sample data in tablular formats
 - Please note that the events might be cancelled or auction date/cusip could be up to changes. That information should be captured by the job.
 
 2. Future Series Construction
@@ -16,8 +16,8 @@ https://www.cmegroup.com/education/courses/introduction-to-futures/understanding
 https://ibkrguides.com/tws/usersguidebook/technicalanalytics/continuous.htm
 
 You have 2 csv files which contain future reference and daily market data, please implement below requirements
-- perform data sanity check
-- constructure two series with suffixes "1" and "A", e.g. IF1.CFX and IFA.CFX
+- Data sanity check
+- Constructure two series with suffixes "1" and "A", e.g. IF1.CFX and IFA.CFX
   - "1": the contract nearest to expiry
   - "A": the contract which most heavily trade or largest open interest 
-- apply price adjustment according to ratio defined in IB document
+- Apply price adjustment according to ratio defined in IB document
