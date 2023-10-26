@@ -33,3 +33,4 @@ US Treasury department publish announcement of their upcoming bond issuances, th
 - Databases can be in any format you are familiar with, either in KDB or SQL DB.
 - For the schema design, please be specific regarding the key/index to be applied. Submit final schema or sample data in csv formats.
 - Please note that the events might be cancelled or auction date/cusip could be up to changes. That information should be captured by the job.
+
