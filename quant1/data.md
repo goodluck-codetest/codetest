@@ -26,7 +26,7 @@ You have 2 csv files which contain future reference and daily market data, pleas
 
 # 3. US Treasury Auction
 
-US Treasury department publish announcement of their upcoming bond issuances, the objective is to build a pipeline for this dataset. Please implement a scraper to scrape the website: https://treasurydirect.gov/auctions/upcoming And design the schema and implement a point in time database to save all data that could possibly be of interest so it can be retrieved in the future for backtest purposes. Below are some specific requirements:
+US Treasury department publish announcement of their upcoming bond issuances, the objective is to build a pipeline for this dataset. Please implement a scraper to scrape the website: https://treasurydirect.gov/auctions/upcoming/  design the schema and implement a point in time database to save all data that could possibly be of interest so it can be retrieved in the future for backtest purposes. Below are some specific requirements:
 
 - Implement the scraper and perform data check.
 - Design job scheduler to run scraper in daily basis.
