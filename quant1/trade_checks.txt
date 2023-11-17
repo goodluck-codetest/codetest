@@ -1,0 +1,32 @@
+Missing values:
+price     0
+volume    0
+dtype: int64
+
+Duplicate rows:
+17262
+
+Data types:
+price     float64
+volume    float64
+dtype: object
+
+Outliers:
+              price         volume
+count  66272.000000   66272.000000
+mean     181.177415     647.091064
+std        2.906421    3338.088817
+min      172.800000       1.000000
+25%      179.800000     100.000000
+50%      182.300000     200.000000
+75%      183.050000     400.000000
+max      185.000000  213000.000000
+
+Negative values:
+price     0
+volume    0
+dtype: int64
+
+Non-unique timestamps:
+35972
+

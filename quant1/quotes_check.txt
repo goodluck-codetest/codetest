@@ -1,0 +1,38 @@
+Missing values:
+bid_price    0
+ask_price    0
+bid_size     0
+ask_size     0
+dtype: int64
+
+Duplicate rows:
+762
+
+Data types:
+bid_price    float64
+ask_price    float64
+bid_size     float64
+ask_size     float64
+dtype: object
+
+Outliers:
+           bid_price      ask_price      bid_size      ask_size
+count  123984.000000  123984.000000  1.239840e+05  1.239840e+05
+mean      180.972118     181.101853  6.735354e+04  7.338111e+04
+std         3.046862       3.030103  6.205631e+05  6.379921e+05
+min       161.000000     164.500000  1.000000e+02  1.000000e+02
+25%       179.600000     179.700000  3.400000e+03  4.500000e+03
+50%       182.200000     182.300000  8.100000e+03  1.050000e+04
+75%       183.000000     183.100000  1.550000e+04  1.920000e+04
+max       184.800000     184.900000  9.271000e+06  8.922700e+06
+
+Negative values:
+bid_price    0
+ask_price    0
+bid_size     0
+ask_size     0
+dtype: int64
+
+Non-unique timestamps:
+30569
+
