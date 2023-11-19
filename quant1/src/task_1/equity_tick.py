@@ -8,24 +8,15 @@ You have been provided one stock’s level-1 trade and quote data (trade.csv, qu
     - liquidity add: bid/ask size increase
     - liquidity taken: both active buy and active sell (Hint: in which you need to define some rules to categorize the trade direction)
 - Performance optimization is encouraged, especially for python code
+#using timedelta instead of datetime? try
 """
 from abc import ABC, abstractmethod
 from typing import Callable, List, Optional
 import pandas as pd
 import logging
 
-# Set up logging
-logger = logging.getLogger('DataQualityChecks')
-logger.setLevel(logging.INFO)
 
-file_handler = logging.FileHandler('data_quality_checks.log')
-file_handler.setLevel(logging.INFO)
-
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-file_handler.setFormatter(formatter)
-
-logger.addHandler(file_handler)
-
+#%%
 class DataQualityChecks:
     """
     This class provides methods for checking the quality of a Pandas DataFrame.
@@ -42,13 +33,25 @@ class DataQualityChecks:
         self.dataset_name = dataset_name
         self.results = {}
 
+        # Set up logging
+        self.logger = logging.getLogger('DataQualityChecks')
+        self.logger.setLevel(logging.INFO)
+
+        file_handler = logging.FileHandler('logging/data_quality_checks.log')
+        file_handler.setLevel(logging.INFO)
+
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        file_handler.setFormatter(formatter)
+
+        self.logger.addHandler(file_handler)        
+
     def check_missing_values(self) -> None:
         """
         Check for missing values in the DataFrame and log the results.
         """
         result = self.df.isnull().sum()
         self.results['Missing values'] = result
-        logger.info(f'Checked missing values in {self.dataset_name}:\n{result}')
+        self.logger.info(f'Checked missing values in {self.dataset_name}:\n{result}')
 
     def check_duplicates(self) -> None:
         """
@@ -57,7 +60,7 @@ class DataQualityChecks:
         df_with_index = self.df.reset_index()
         result = df_with_index.duplicated().sum()        
         self.results['Duplicate rows'] = result
-        logger.info(f'Checked duplicate rows in {self.dataset_name}: {result}')
+        self.logger.info(f'Checked duplicate rows in {self.dataset_name}: {result}')
 
     def check_data_types(self) -> None:
         """
@@ -65,7 +68,7 @@ class DataQualityChecks:
         """
         result = self.df.dtypes
         self.results['Data types'] = result
-        logger.info(f'Checked data types in {self.dataset_name}:\n{result}')
+        self.logger.info(f'Checked data types in {self.dataset_name}:\n{result}')
 
     def check_outliers(self, outlier_check: Optional[Callable[[pd.DataFrame], pd.DataFrame]]=None) -> None:
         """
@@ -79,7 +82,7 @@ class DataQualityChecks:
         else:
             result = outlier_check(self.df)
         self.results['Outliers'] = result
-        logger.info(f'Checked outliers in {self.dataset_name}:\n{result}')
+        self.logger.info(f'Checked outliers in {self.dataset_name}:\n{result}')
 
     def check_consistency(self, columns: Optional[List[str]]=None) -> None:
         """
@@ -91,7 +94,7 @@ class DataQualityChecks:
             columns = self.df.columns
         result = self.df[columns][self.df[columns] < 0].count()
         self.results['Negative values'] = result
-        logger.info(f'Checked negative values in columns {columns} of {self.dataset_name}:\n{result}')
+        self.logger.info(f'Checked negative values in columns {columns} of {self.dataset_name}:\n{result}')
 
     def check_timestamps(self) -> None:
         """
@@ -100,9 +103,9 @@ class DataQualityChecks:
         try:
             result = self.df.index.duplicated().sum()
             self.results['Non-unique timestamps'] = result
-            logger.info(f'Checked non-unique timestamps in {self.dataset_name}: {result}')
+            self.logger.info(f'Checked non-unique timestamps in {self.dataset_name}: {result}')
         except TypeError:
-            logger.error("Index is not of type datetime")
+            self.logger.error("Index is not of type datetime")
 
     def run(self, outlier_check: Optional[Callable[[pd.DataFrame], pd.DataFrame]]=None, columns: Optional[List[str]]=None) -> None:
         """
@@ -127,7 +130,7 @@ class DataQualityChecks:
         with open(filename, 'w') as f:
             for key, value in self.results.items():
                 f.write(f"{key}:\n{value}\n\n")
-        logger.info(f'Wrote results of {self.dataset_name} checks to file: {filename}')
+        self.logger.info(f'Wrote results of {self.dataset_name} checks to file: {filename}')
 
 
 class DataAggregator(ABC):
@@ -149,7 +152,7 @@ class DataAggregator(ABC):
         self.logger = logging.getLogger('DataAggregator')
         self.logger.setLevel(logging.INFO)
 
-        file_handler = logging.FileHandler('data_aggregator.log')
+        file_handler = logging.FileHandler('logging/data_aggregator.log')
         file_handler.setLevel(logging.INFO)
 
         formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -173,7 +176,9 @@ class DataAggregator(ABC):
             else:
                 self.df_agg[col] = self.df_resampled[col].agg(func)
 
-    @abstractmethod
+    def set_other_aggregator(self, other_aggregator):
+        self.other_aggregator = other_aggregator                
+
     def run(self):
         """
         Run the aggregation process.
@@ -215,15 +220,41 @@ class TradeDataAggregator(DataAggregator):
         self.df_agg['twap'] = self.df_resampled['price'].mean()
         self.df_agg['twap'] = self.df_agg['twap'].round(2)
 
+
+    def calculate_active_trades(self):
+        # Ensure we have a reference to the other aggregator
+        if not hasattr(self, 'other_aggregator'): 
+            raise Exception('Other aggregator not set')
+
+        quote_df_agg = self.other_aggregator.df_agg
+
+        # Merge dataframes on the index
+        merged_df = self.df_agg.merge(quote_df_agg, left_index=True, right_index=True, how='outer')
+
+        # Create active_buy_vol and active_sell_vol columns using vectorized operations
+        #If a market buy order (an order to buy at whatever price is available) is placed when there is not enough volume 
+        #at the current ask price, the order will start filling at higher prices. 
+        #This could potentially push the closing price of that 5-minute bin higher than the recorded ask price.
+        merged_df['active_buy_vol'] = merged_df.loc[merged_df['close'] >= merged_df['ask_price'], 'volume']
+        merged_df['active_sell_vol'] = merged_df.loc[merged_df['close'] <= merged_df['bid_price'], 'volume']
+
+        # Replace NaN values with 0 (since NaN means there was no active buy/sell)
+        merged_df.fillna({'active_buy_vol': 0, 'active_sell_vol': 0}, inplace=True)
+
+        # Add new columns to original dataframe
+        self.df_agg = self.df_agg.merge(merged_df[['active_buy_vol', 'active_sell_vol']], left_index=True, right_index=True, how='left')
+
     def run(self):
-        super().run()
+        self.aggregate_data()
+        self.calculate_active_trades()
 
-
-class OrderDataAggregator(DataAggregator):
+class QuoteDataAggregator(DataAggregator):
     """
-    This class aggregates order data.
+    This class aggregates quote data.
     """
     def __init__(self, df: pd.DataFrame):
+
+        super().__init__(df)
         
         self.agg_funcs = {
             'bid_price': 'last',
@@ -232,7 +263,7 @@ class OrderDataAggregator(DataAggregator):
             'ask_size': 'last'
         }
 
-        self.dataset_name = 'OrderData'
+        self.dataset_name = 'QuoteData'
 
     def aggregate_data(self, freq='5T'):
         super().aggregate_data(freq)
@@ -244,20 +275,11 @@ class OrderDataAggregator(DataAggregator):
         ask_size_increase = self.df_agg['ask_size'].diff().clip(lower=0)
         self.df_agg['liquidity_added'] = bid_size_increase + ask_size_increase
 
-        # Calculate liquidity taken
-        active_buy_volume = self.df[self.df['trade_side'] == 'buy']['volume'].resample('5T').sum()
-        active_sell_volume = self.df[self.df['trade_side'] == 'sell']['volume'].resample('5T').sum()
-        self.df_agg['liquidity_taken'] = active_buy_volume + active_sell_volume
-
-        self.logger.info(f'Done calculating liquidity flow data for {self.dataset_name}.')
-
-    def run(self):
-        super().run()
-
+#%%
 def main():
     # Load your data
-    trades = pd.read_csv('trade.csv')
-    quotes = pd.read_csv('quote.csv')
+    trades = pd.read_csv('data/trade.csv')
+    quotes = pd.read_csv('data/quote.csv')
 
     # Convert 'time' to datetime and set as index
     # Assuming the date is today
@@ -266,38 +288,30 @@ def main():
     quotes['time'] = pd.to_datetime(quotes['time'])
     quotes.set_index('time', inplace=True)
 
-    # # Create DataQualityChecks objects
-    # trades_check = DataQualityChecks(trades,'trades')
-    # quotes_check = DataQualityChecks(quotes,'quotes')
+    # Create DataQualityChecks objects
+    trades_check = DataQualityChecks(trades,'trades')
+    quotes_check = DataQualityChecks(quotes,'quotes')
 
-    # # Run all checks
-    # trades_check.run()
-    # quotes_check.run()
+    # Run all checks
+    trades_check.run()
+    quotes_check.run()
 
-    # # Run all checks
-    # trades_check.write_to_file('trade_checks.txt')
-    # quotes_check.write_to_file('quotes_check.txt')
+    # Run all checks
+    trades_check.write_to_file('output/task_1/data_quality_check/trade_checks.txt')
+    quotes_check.write_to_file('output/task_1/data_quality_check/quotes_check.txt')
 
-    trades_agg_funcs = {
-        'price':['first', 'max', 'min', 'last',],
-        'volume':'sum',
-    }
+    quotes_aggregator = QuoteDataAggregator(quotes)
+    quotes_aggregator.run()
 
-    quotes_agg_funcs = {
-        'bid_price': 'last',
-        'ask_price': 'last',
-        'bid_size': 'last',
-        'ask_size': 'last'
-    }
+    # Make aggregators aware of each other
+    trade_aggregator = TradeDataAggregator(trades)
+    trade_aggregator.set_other_aggregator(quotes_aggregator)
+    trade_aggregator.run()
 
-    trades_aggregate = DataAggregator(trades,trades_agg_funcs,'trades')
-    # quotes_aggregate = DataAggregator(quotes,quotes_agg_funcs,'quotes')
-
-    trades_aggregate.run()
-    # quotes_aggregate.run()
-
-    trades_aggregate.write_to_file('trades_aggregate.csv')
-    # quotes_aggregate.write_to_file('quotes_aggregate.csv')
+    trade_aggregator.write_to_file('output/task_1/aggregation/trades_aggregate.csv')
+    quotes_aggregator.write_to_file('output/task_1/aggregation/quotes_aggregate.csv')
+    
     
 if __name__ == '__main__':
     main()
+
