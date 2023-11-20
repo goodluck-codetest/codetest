@@ -43,7 +43,11 @@ class DataQualityChecks:
         formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
         file_handler.setFormatter(formatter)
 
-        self.logger.addHandler(file_handler)        
+        self.logger.addHandler(file_handler)
+
+    def set_time_index(self) -> None:
+        self.df['time'] = pd.to_datetime(self.df['time'])
+        self.df.set_index('time', inplace=True)  
 
     def check_missing_values(self) -> None:
         """
@@ -107,9 +111,26 @@ class DataQualityChecks:
         except TypeError:
             self.logger.error("Index is not of type datetime")
 
-    def run(self, outlier_check: Optional[Callable[[pd.DataFrame], pd.DataFrame]]=None, columns: Optional[List[str]]=None) -> None:
+    def run(self, time_stamp: bool , outlier_check: Optional[Callable[[pd.DataFrame], pd.DataFrame]]=None, columns: Optional[List[str]]=None) -> None:
         """
         Run all data quality checks and log the results.
+
+        :param outlier_check: function, optional, a function that takes a DataFrame and returns an outlier check result
+        :param columns: list, optional, a list of column names to check for negative values
+        """
+        if time_stamp:
+            self.set_time_index()
+            self.check_timestamps()
+
+        self.check_missing_values()
+        self.check_duplicates()
+        self.check_data_types()
+        self.check_outliers(outlier_check)
+        self.check_consistency(columns)
+        
+    def run_ref_data(self, outlier_check: Optional[Callable[[pd.DataFrame], pd.DataFrame]]=None, columns: Optional[List[str]]=None) -> None:
+        """
+        Run all data quality checks and log the results specifically for ref dataset
 
         :param outlier_check: function, optional, a function that takes a DataFrame and returns an outlier check result
         :param columns: list, optional, a list of column names to check for negative values
@@ -117,9 +138,6 @@ class DataQualityChecks:
         self.check_missing_values()
         self.check_duplicates()
         self.check_data_types()
-        self.check_outliers(outlier_check)
-        self.check_consistency(columns)
-        self.check_timestamps()
 
     def write_to_file(self, filename: str) -> None:
         """
@@ -280,13 +298,6 @@ def main():
     # Load your data
     trades = pd.read_csv('data/trade.csv')
     quotes = pd.read_csv('data/quote.csv')
-
-    # Convert 'time' to datetime and set as index
-    # Assuming the date is today
-    trades['time'] = pd.to_datetime(trades['time'])
-    trades.set_index('time', inplace=True)
-    quotes['time'] = pd.to_datetime(quotes['time'])
-    quotes.set_index('time', inplace=True)
 
     # Create DataQualityChecks objects
     trades_check = DataQualityChecks(trades,'trades')
