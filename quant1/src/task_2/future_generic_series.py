@@ -60,33 +60,20 @@ class FutureData:
     def calculate_rollover_dates(self,futures):
         futures = futures.sort_values(by=['trade_date', 'delist_date'])
 
-        futures['vol_diff'] = futures.groupby('trade_date')['vol'].diff()
+        # Initialize variables to keep track of the current ts_code and its volume
+        current_ts_code, current_volume = futures.iloc[0]['ts_code'], futures.iloc[0]['vol']
 
+        for i in range(1, len(futures)):
+            # If a new ts_code appears that has a later delist_date and higher volume
+            current_trade_date = futures.iloc[i]['trade_date']
+            current_volume = futures[(futures['trade_date'] == current_trade_date) & futures['ts_code'] == current_ts_code]['vol']
 
-        # futures['rollover'] = 0
-        # contracts = futures['ts_code'].unique()
+            if futures.iloc[i]['delist_date'] > futures[futures['ts_code'] == current_ts_code]['delist_date'].max() and futures.iloc[i]['vol'] > current_volume:
+                futures.at[futures.iloc[i].name, 'rollover'] = 1  # Flag this row as a rollover
+                current_ts_code = futures.iloc[i]['ts_code']  # Update the current ts_code
+                current_volume = futures.iloc[i]['vol']  # Update the current volume        
 
-        # # For each contract, except the last one
-        # for i in range(len(contracts) - 1):
-        #     curr_contract = contracts[i]
-        #     next_contract = contracts[i + 1]
-
-        #     # Create a temporary merged dataframe for current and next contracts
-        #     temp_df = pd.merge(futures[futures['ts_code'] == curr_contract], 
-        #                        futures[futures['ts_code'] == next_contract], 
-        #                        on='trade_date', how='inner', 
-        #                        suffixes=('_curr', '_next'))
-
-        #     # Get the dates where the next contract's volume exceeds the current contract's volume
-        #     rollover_dates = temp_df['trade_date'][temp_df['vol_next'] > temp_df['vol_curr']]
-
-        #     if len(rollover_dates):
-        #         rollover_date = rollover_dates.min()                
-        #     else:
-        #         rollover_date = temp_df['trade_date'].max()
-    
-        #     # Mark those dates with rollover=1 in the original dataframe
-        #     futures.loc[(futures['trade_date'] == rollover_date) & (futures['ts_code'] == curr_contract), 'rollover'] = 1
+        futures['rollover'] = futures['rollover'].fillna(0)
 
         return futures
 
