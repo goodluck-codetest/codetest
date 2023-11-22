@@ -8,7 +8,6 @@ You have been provided one stock’s level-1 trade and quote data (trade.csv, qu
     - liquidity add: bid/ask size increase
     - liquidity taken: both active buy and active sell (Hint: in which you need to define some rules to categorize the trade direction)
 - Performance optimization is encouraged, especially for python code
-#using timedelta instead of datetime? try
 """
 from abc import ABC, abstractmethod
 from typing import Callable, List, Optional

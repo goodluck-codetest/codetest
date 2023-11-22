@@ -1,0 +1,20 @@
+WDM - INFO - ====== WebDriver manager ======
+WDM - INFO - Get LATEST chromedriver version for google-chrome
+WDM - INFO - Get LATEST chromedriver version for google-chrome
+WDM - INFO - Driver [C:\Users\simon\.wdm\drivers\chromedriver\win64\119.0.6045.105\chromedriver-win32/chromedriver.exe] found in cache
+root - INFO - Start fetching data from https://treasurydirect.gov/auctions/upcoming/
+root - INFO - Start parsing table institTableBillsUpcoming
+root - INFO - Finished parsing table institTableBillsUpcoming
+root - INFO - Start parsing table institTableNotesUpcoming
+root - INFO - Finished parsing table institTableNotesUpcoming
+root - INFO - Start parsing table institTableBondsUpcoming
+root - INFO - Finished parsing table institTableBondsUpcoming
+root - INFO - Start parsing table institTableTIPSUpcoming
+root - INFO - Finished parsing table institTableTIPSUpcoming
+root - INFO - Start parsing table institTableFRNUpcoming
+root - INFO - Finished parsing table institTableFRNUpcoming
+root - INFO - Finished fetching data from https://treasurydirect.gov/auctions/upcoming/
+root - ERROR - Missing required field CUSIP in record {'Bonds': 'No scheduled Bond offerings.'}
+root - ERROR - Missing required field CUSIP in record {'TIPS': 'No scheduled TIPS offerings.'}
+root - ERROR - Missing required field CUSIP in record {'FRNs': 'No scheduled FRN offerings.'}
+root - INFO - Inserted data: [('Bills', '17-Week', 0, 0, '912797JK4', 56000000000, '20231121', '20231122', '20231128'), ('Bills', '4-Week', 0, 0, '912797HW0', 85000000000, '20231121', '20231122', '20231128'), ('Bills', '8-Week', 0, 0, '912797JA6', 80000000000, '20231121', '20231122', '20231128'), ('Bills', '13-Week', 0, 0, '912797GP6', None, '20231122', '20231127', '20231130'), ('Bills', '26-Week', 0, 0, '912797HS9', None, '20231122', '20231127', '20231130'), ('Bills', '52-Week', 0, 0, '912797HP5', None, '20231122', '20231128', '20231130'), ('Notes', '2-Year', 0, 0, '91282CJL6', None, '20231122', '20231127', '20231130'), ('Notes', '5-Year', 0, 0, '91282CJN2', None, '20231122', '20231127', '20231130'), ('Notes', '7-Year', 0, 0, '91282CJM4', None, '20231122', '20231128', '20231130')]

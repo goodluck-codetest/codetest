@@ -1,0 +1,13 @@
+cid,name,type,notnull,dflt_value,pk
+0,id,INTEGER,0,,1
+1,bond_type,TEXT,0,,0
+2,bond_duration,TEXT,0,,0
+3,cmb,INTEGER,0,,0
+4,reopening,INTEGER,0,,0
+5,cusip,TEXT,0,,0
+6,offering_amount,INTEGER,0,,0
+7,announcement_date,DATE,0,,0
+8,auction_date,DATE,0,,0
+9,issue_date,DATE,0,,0
+10,cancelled,INTEGER,0,NULL,0
+11,last_updated,TIMESTAMP,0,CURRENT_TIMESTAMP,0
