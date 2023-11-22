@@ -28,8 +28,6 @@ Apply price adjustment according to ratio defined in reference page
 Please visualize the rolling path and adjusted price
 #%%
 """
-import matplotlib.pyplot as plt
-
 from ..task_1.equity_tick import DataQualityChecks
 
 import pandas as pd
@@ -57,31 +55,43 @@ class FutureData:
         
         return index_futures
     
-    def calculate_rollover_dates(self,futures):
-        futures = futures.sort_values(by=['trade_date', 'delist_date'])
+    def calculate_rollover_dates(self,df):
+        df = df.sort_values(by=['trade_date', 'delist_date'])
 
-        # Initialize variables to keep track of the current ts_code and its volume
-        current_ts_code, current_volume = futures.iloc[0]['ts_code'], futures.iloc[0]['vol']
+        df = df.reset_index(drop=True)
 
-        for i in range(1, len(futures)):
-            # If a new ts_code appears that has a later delist_date and higher volume
-            current_trade_date = futures.iloc[i]['trade_date']
-            current_volume = futures[(futures['trade_date'] == current_trade_date) & futures['ts_code'] == current_ts_code]['vol']
+        # Initialize 'rollover' column with 0
+        df['rollover'] = 0
 
-            if futures.iloc[i]['delist_date'] > futures[futures['ts_code'] == current_ts_code]['delist_date'].max() and futures.iloc[i]['vol'] > current_volume:
-                futures.at[futures.iloc[i].name, 'rollover'] = 1  # Flag this row as a rollover
-                current_ts_code = futures.iloc[i]['ts_code']  # Update the current ts_code
-                current_volume = futures.iloc[i]['vol']  # Update the current volume        
+        # Initialize current contract
+        current_contract = df['ts_code'].iloc[0]
 
-        futures['rollover'] = futures['rollover'].fillna(0)
+        # Iterate over the DataFrame
+        for i in range(1, len(df)):
+            # Get all contracts on the current trade date
+            current_date_contracts = df[df['trade_date'] == df['trade_date'].iloc[i]]
+            
+            # Check if the current contract is still being traded
+            if current_contract not in current_date_contracts['ts_code'].values:
+                # If not, roll over to the next contract with the highest volume
+                next_contract = current_date_contracts.sort_values('vol', ascending=False)['ts_code'].values[0]
+                df.loc[(df['ts_code'] == next_contract) & (df['trade_date'] == df['trade_date'].iloc[i]), 'rollover'] = 1
+                current_contract = next_contract
+            else:
+                # If yes, get the volume and delist_date of the current contract
+                current_contract_vol = current_date_contracts[current_date_contracts['ts_code'] == current_contract]['vol'].values[0]
+                current_contract_delist_date = current_date_contracts[current_date_contracts['ts_code'] == current_contract]['delist_date'].values[0]
+            
+                # Check if there's a new contract with higher volume and farther delist date
+                rollover_contracts = current_date_contracts[(current_date_contracts['vol'] > current_contract_vol) & (current_date_contracts['delist_date'] > current_contract_delist_date)]
+            
+                if not rollover_contracts.empty:
+                    # Mark rollover
+                    df.loc[(df['ts_code'] == rollover_contracts.sort_values('vol', ascending=False)['ts_code'].values[0]) & (df['trade_date'] == df['trade_date'].iloc[i]), 'rollover'] = 1
+                    # Update current contract to the one with the highest volume
+                    current_contract = rollover_contracts.sort_values('vol', ascending=False)['ts_code'].values[0]
 
-        return futures
-
-    # def calculate_rollover_dates(futures):
-    #     futures['volume_shifted'] = futures.groupby('ts_code')['volume'].shift(-1)
-    #     rollover_rows = futures[futures['volume'] < futures['volume_shifted']]
-    #     rollover_dates = rollover_rows.groupby('ts_code')['trade_date'].max()
-    #     return rollover_dates
+        return df
 
     def process_commodity_futures(self,futures):
         commodity_futures = futures[futures['fut_code'] == 'P']
@@ -164,12 +174,12 @@ class MyAnalysis:
         self.data = FutureData(future_price_file, future_ref_file)
 
     def run(self):
-        futures = self.data.merge_and_filter()
-        index_futures = self.data.process_index_futures(futures)
-        index_futures = self.data.adjust_close(index_futures)
-        rolling_paths = index_futures[index_futures['rollover'] == 1]
-        self.data.export_data(rolling_paths, 'output/task_2/futures_rolling/rolling_path.csv')
-        self.data.plot(rolling_paths, 'output/task_2/futures_rolling/rolling_plot.png')        
+        self.futures = self.data.merge_and_filter()
+        self.index_futures = self.data.process_index_futures(self.futures)
+        # index_futures = self.data.adjust_close(index_futures)
+        # rolling_paths = index_futures[index_futures['rollover'] == 1]
+        # self.data.export_data(rolling_paths, 'output/task_2/futures_rolling/rolling_path.csv')
+        # self.data.plot(rolling_paths, 'output/task_2/futures_rolling/rolling_plot.png')        
 
         #commodity_futures = self.data.process_commodity_futures(futures)
         #commodity_futures = self.data.adjust_close(commodity_futures)
@@ -192,6 +202,7 @@ def main():
 
     analysis = MyAnalysis(future_price, future_ref)
     analysis.run()
+    analysis.index_futures
 
 if __name__ == '__main__':
     main()
