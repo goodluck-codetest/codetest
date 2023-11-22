@@ -29,7 +29,6 @@ Please visualize the rolling path and adjusted price
 #%%
 """
 from ..task_1.equity_tick import DataQualityChecks
-
 import pandas as pd
 import matplotlib.pyplot as plt
 
@@ -50,10 +49,18 @@ class FutureData:
         index_futures['generic'] = index_futures['expiry_rank'].map({1: 'IFc1', 2: 'IFc2', 3: 'IFc3'})
         index_futures = index_futures[index_futures['generic'].isin(['IFc1','IFc2','IFc3'])]
         index_futures = self.calculate_rollover_dates(index_futures)
-        #index_futures['contract_change'] = index_futures['ts_code'].shift(-1) != index_futures['ts_code']
-        #index_futures = self.calculate_rollover_dates(index_futures)
         
         return index_futures
+    
+    def process_commodity_futures(self, futures):
+        commodity_futures = futures[futures['fut_code'] == 'P']
+        commodity_futures['active_rank'] = commodity_futures.groupby('trade_date')['oi'].rank(method='max')
+        commodity_futures['generic'] = commodity_futures['active_rank'].map({1: 'Pv1', 2: 'Pv2', 3: 'Pv3'})
+        commodity_futures = commodity_futures[commodity_futures['generic'].isin(['Pv1','Pv2','Pv3'])]
+        commodity_futures = self.calculate_rollover_dates(commodity_futures)
+        
+        return commodity_futures
+
     
     def calculate_rollover_dates(self,df):
         df = df.sort_values(by=['trade_date', 'delist_date'])
@@ -93,71 +100,60 @@ class FutureData:
 
         return df
 
-    def process_commodity_futures(self,futures):
-        commodity_futures = futures[futures['fut_code'] == 'P']
-        commodity_futures['activity_rank'] = commodity_futures.groupby('trade_date')['vol'].rank(method='min')
-        commodity_futures['generic'] = commodity_futures['activity_rank'].map({1: 'Pv1', 2: 'Pv2', 3: 'Pv3'})
-        commodity_futures = commodity_futures[commodity_futures['generic'].isin(['Pv1','Pv2','Pv3'])]
-        commodity_futures['contract_change'] = commodity_futures['ts_code'].shift(-1) != commodity_futures['ts_code']
-        return commodity_futures        
+    def adjust_close(self, df):
+        # Initialize column for adjusted prices
+        df['adj_price'] = df['close']
+        df['adj_ratio'] = 1.0  # initialize with 1's as this will not affect prices
 
-#    def adjust_close(self, futures):
-#        ratio = futures['close'] / futures['close'].shift(-1)
-#        futures['adj_factor'] = (futures['contract_change'].shift().fillna(0) * ratio).replace(0, 1).cumprod()
-#        futures['adj_close'] = futures['adj_factor'] * futures['close']
-#        futures['adj_close'] = futures['adj_close'].round(1)
-#        return futures.sort_values(['ts_code','trade_date'])
+        # Variable for storing the closing price of the last contract
+        last_contract = None
+        # Dictionary for storing the closing prices of the contracts
+        closing_prices = {}
 
-    def adjust_close(self, futures):
-        unique_ts_codes = futures['ts_code'].unique()
-        
-        # Concatenate all adjusted futures dataframes
-        adjusted_futures_df = pd.DataFrame()
+        # Iterate over rows to calculate adjusted prices
+        for i in range(len(df)):
+            # Store the closing price of the current contract
+            current_contract = df.loc[i, 'ts_code']
+            closing_prices[current_contract] = df.loc[i, 'close']
 
-        first_df = futures[futures['ts_code'] == unique_ts_codes[0]]
+            # Check if there is a rollover
+            if df.loc[i, 'rollover'] == 1 and last_contract is not None:
+                # The previous contract should be the one that is not the current contract
+                previous_contract = last_contract
+                previous_price = closing_prices[previous_contract]
 
-        first_df['ratio'] = 1
+                # Calculate adjustment ratio
+                ratio = df.loc[i, 'close'] / previous_price
 
-        first_df['adj_close'] = first_df['close']
+                # Adjust price for all dates of the old contract
+                df.loc[df['ts_code'] == previous_contract, 'adj_price'] *= ratio
 
-        adjusted_futures_df = pd.concat([adjusted_futures_df,first_df])
-        
-        for i in range(len(unique_ts_codes) - 1):
-            contract_a_code = unique_ts_codes[i]
-            contract_b_code = unique_ts_codes[i+1]
+                # Store adjustment ratio
+                df.loc[df['ts_code'] == previous_contract, 'adj_ratio'] = ratio
             
-            contract_a = futures[futures['ts_code'] == contract_a_code]
-            contract_b = futures[futures['ts_code'] == contract_b_code]
-            
-            # Find the date when contract B becomes the lead
-            change_date = contract_a[contract_a['rollover'] == 1]['trade_date'].values[0]
-            
-            # Get the closing prices of contract A and B on the change date
-            close_price_a = contract_a.loc[contract_a['trade_date'] == change_date, 'close'].values[0]
-            close_price_b = contract_b.loc[contract_b['trade_date'] == change_date, 'close'].values[0]
-            
-            # Calculate the ratio
-            ratio = close_price_a / close_price_b
+            last_contract = current_contract
 
-            # Apply the ratio to all closing prices of contract B
-            contract_b['adj_close'] = contract_b['close'] * ratio
+        df['adj_price'] = df['adj_price'].round(1)
 
-            contract_b['adj_close'] = contract_b['adj_close'].round(1)
+        df['adj_ratio'] = df['adj_ratio'].round(1)
 
-            contract_b['ratio'] = ratio
-            
-            adjusted_futures_df = pd.concat([adjusted_futures_df, contract_b])
-        
-        return adjusted_futures_df.sort_values(['trade_date',])
-
+        return df
+    
+    def output_rolling_result(self, df, file_name, graph_name):
+        rolling = df[df['rollover'] == 1]
+        self.export_data(rolling, file_name)
+        self.plot(rolling, graph_name)      
 
     def export_data(self, futures, filename):
         futures.to_csv(filename, index=False)
 
     def plot(self, futures, export_png_name=None):
+
+        futures['trade_date'] = pd.to_datetime(futures['trade_date'], format='%Y%m%d')
+
         plt.figure(figsize=(20, 10))
         plt.plot(futures['trade_date'], futures['close'], label='Original Close Price')
-        plt.plot(futures['trade_date'], futures['adj_close'], label='Adjusted Close Price')
+        plt.plot(futures['trade_date'], futures['adj_price'], label='Adjusted Close Price')
         plt.xlabel('Date')
         plt.ylabel('Price')
         plt.legend()
@@ -174,17 +170,18 @@ class MyAnalysis:
         self.data = FutureData(future_price_file, future_ref_file)
 
     def run(self):
-        self.futures = self.data.merge_and_filter()
-        self.index_futures = self.data.process_index_futures(self.futures)
-        # index_futures = self.data.adjust_close(index_futures)
-        # rolling_paths = index_futures[index_futures['rollover'] == 1]
-        # self.data.export_data(rolling_paths, 'output/task_2/futures_rolling/rolling_path.csv')
-        # self.data.plot(rolling_paths, 'output/task_2/futures_rolling/rolling_plot.png')        
+        futures = self.data.merge_and_filter()
+        self.futures = futures
 
-        #commodity_futures = self.data.process_commodity_futures(futures)
-        #commodity_futures = self.data.adjust_close(commodity_futures)
-        #self.data.export_data(commodity_futures, 'output/task_2/futures_rolling/commodity_future.csv')
-        #self.data.plot(commodity_futures, 'output/task_2/futures_rolling/commodity_future_plot.png')
+        index_futures = self.data.process_index_futures(futures)
+        index_futures = self.data.adjust_close(index_futures)
+        self.index_futures = index_futures
+        self.data.output_rolling_result(index_futures,'output/task_2/futures_rolling/index_rolling_path.csv','output/task_2/futures_rolling/index_rolling_plot.png')
+  
+        commodity_futures = self.data.process_commodity_futures(futures)
+        commodity_futures = self.data.adjust_close(commodity_futures)
+        self.commodity_futures = commodity_futures
+        self.data.output_rolling_result(commodity_futures,'output/task_2/futures_rolling/commodity_rolling_path.csv','output/task_2/futures_rolling/commodity_rolling_plot.png')
 
 #%%
 def main():
@@ -202,7 +199,6 @@ def main():
 
     analysis = MyAnalysis(future_price, future_ref)
     analysis.run()
-    analysis.index_futures
 
 if __name__ == '__main__':
     main()
