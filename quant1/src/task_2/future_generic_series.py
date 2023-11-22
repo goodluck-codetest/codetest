@@ -171,24 +171,20 @@ class MyAnalysis:
 
     def run(self):
         futures = self.data.merge_and_filter()
-        self.futures = futures
 
         index_futures = self.data.process_index_futures(futures)
         index_futures = self.data.adjust_close(index_futures)
-        self.index_futures = index_futures
         self.data.output_rolling_result(index_futures,'output/task_2/futures_rolling/index_rolling_path.csv','output/task_2/futures_rolling/index_rolling_plot.png')
   
         commodity_futures = self.data.process_commodity_futures(futures)
         commodity_futures = self.data.adjust_close(commodity_futures)
-        self.commodity_futures = commodity_futures
         self.data.output_rolling_result(commodity_futures,'output/task_2/futures_rolling/commodity_rolling_path.csv','output/task_2/futures_rolling/commodity_rolling_plot.png')
 
 #%%
 def main():
     future_ref = pd.read_csv('data/future_ref.csv')
     future_price = pd.read_csv('data/future_price.csv')
-    # future_price = pd.read_csv(os.path.join(os.path.join(os.getcwd(),'data','future_price.csv')))
-    # future_ref = pd.read_csv(os.path.join(os.path.join(os.getcwd(),'data','future_ref.csv')))
+
     future_ref_check = DataQualityChecks(future_ref,'future_ref')
     future_ref_check.run_ref_data()
     future_ref_check.write_to_file('output/task_2/data_quality_check/future_ref_check.txt')
