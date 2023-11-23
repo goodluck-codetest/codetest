@@ -1,0 +1,65 @@
+Missing values:
+ts_code          0
+trade_date       0
+pre_close      117
+pre_settle       0
+open          1948
+high          1948
+low           1948
+close           13
+settle           0
+change1         13
+change2          0
+vol              0
+amount           0
+oi               0
+oi_chg         113
+dtype: int64
+
+Duplicate rows:
+0
+
+Data types:
+ts_code        object
+trade_date      int64
+pre_close     float64
+pre_settle    float64
+open          float64
+high          float64
+low           float64
+close         float64
+settle        float64
+change1       float64
+change2       float64
+vol           float64
+amount        float64
+oi            float64
+oi_chg        float64
+dtype: object
+
+Outliers:
+         trade_date     pre_close    pre_settle          open  ...           vol        amount            oi         oi_chg
+count  1.647100e+04  16354.000000  16471.000000  14523.000000  ...  1.647100e+04  1.647100e+04  1.647100e+04   16358.000000
+mean   2.021243e+07   6537.701651   6530.361921   6621.104854  ...  7.731677e+04  1.360206e+06  5.363966e+04      50.865876
+std    1.263077e+04   1985.019774   1983.329757   2031.522227  ...  2.615012e+05  3.056027e+06  1.123444e+05    9670.515799
+min    2.019012e+07   3422.000000   3428.200000   3421.800000  ...  0.000000e+00  0.000000e+00  0.000000e+00 -780896.000000
+25%    2.020082e+07   4856.000000   4854.000000   4844.700000  ...  2.100000e+01  1.471950e+02  2.430000e+02     -20.000000
+50%    2.021091e+07   6479.000000   6468.000000   6738.000000  ...  4.672000e+03  6.924300e+04  1.028600e+04       1.000000
+75%    2.022093e+07   7814.000000   7816.000000   7880.000000  ...  2.202500e+04  6.790769e+05  5.822450e+04     716.750000
+max    2.023103e+07  16124.000000  16142.000000  16440.000000  ...  4.474684e+06  2.787221e+07  1.638964e+06  140176.000000
+
+[8 rows x 14 columns]
+
+Negative values:
+pre_close     0
+pre_settle    0
+open          0
+high          0
+low           0
+close         0
+settle        0
+vol           0
+amount        0
+oi            0
+dtype: int64
+
