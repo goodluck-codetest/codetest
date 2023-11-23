@@ -78,7 +78,7 @@ Please note that you might need to install some dependencies before running the 
 
 ```bash
 pip install -r requirements.txt
-
+```
 
 # Equity Tick Data Processing Report
 
