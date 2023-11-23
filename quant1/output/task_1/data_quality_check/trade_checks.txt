@@ -1,3 +1,6 @@
+Non-unique timestamps:
+35972
+
 Missing values:
 price     0
 volume    0
@@ -26,7 +29,4 @@ Negative values:
 price     0
 volume    0
 dtype: int64
-
-Non-unique timestamps:
-35972
 

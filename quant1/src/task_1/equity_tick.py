@@ -110,7 +110,7 @@ class DataQualityChecks:
         except TypeError:
             self.logger.error("Index is not of type datetime")
 
-    def run(self, time_stamp: bool , outlier_check: Optional[Callable[[pd.DataFrame], pd.DataFrame]]=None, columns: Optional[List[str]]=None) -> None:
+    def run(self, time_stamp: bool=True , outlier_check: Optional[Callable[[pd.DataFrame], pd.DataFrame]]=None, columns: Optional[List[str]]=None) -> None:
         """
         Run all data quality checks and log the results.
 

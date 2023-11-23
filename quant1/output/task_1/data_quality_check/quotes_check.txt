@@ -1,3 +1,6 @@
+Non-unique timestamps:
+30569
+
 Missing values:
 bid_price    0
 ask_price    0
@@ -32,7 +35,4 @@ ask_price    0
 bid_size     0
 ask_size     0
 dtype: int64
-
-Non-unique timestamps:
-30569
 
