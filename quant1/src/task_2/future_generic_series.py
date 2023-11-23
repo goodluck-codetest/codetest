@@ -182,6 +182,9 @@ class MyAnalysis:
 
 #%%
 def main():
+    
+    pd.options.mode.chained_assignment = None  # default='warn'
+
     future_ref = pd.read_csv('data/future_ref.csv')
     future_price = pd.read_csv('data/future_price.csv')
 
