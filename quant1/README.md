@@ -68,11 +68,12 @@ To run the scripts, you need to navigate to the `quant1/` directory and run the 
 
     - To run the `us_treasury_aution` script, you can use the following command:
 
+        > _**NOTE:** This script is **not** designed to be run manually. Instead, it is intended to be scheduled to run at specific intervals using a job scheduler such as `crontab`. Please follow the instructions provided below to set up `crontab` and schedule the script to run._
+
         ```bash
         python -m src.task_3.us_treasury_aution
         ```
-    > _**NOTE:** This script is **not** designed to be run manually. Instead, it is intended to be scheduled to run at specific intervals using a job scheduler such as `crontab`. Please follow the instructions provided below to set up `crontab` and schedule the script to run._
-
+    
 Please note that you might need to install some dependencies before running the scripts. If a `requirements.txt` file is provided in the project, you can install the required dependencies using the following command:
 
 ```bash
